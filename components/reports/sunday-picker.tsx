@@ -10,7 +10,8 @@ export function SundayPicker({ value, basePath, className }: { value: string; ba
   const router = useRouter();
   const thisSunday = currentReportSunday();
   const go = (d: string) => router.push(`${basePath}?date=${d}`);
-  const options = [...new Set([addDays(thisSunday, 7), ...recentSundays(26), value])].sort((a, b) => b.localeCompare(a));
+  // 다음 주일 보고 창은 그 주일 0시에 열리므로 미래 주일은 고를 수 없다
+  const options = [...new Set([...recentSundays(26), value])].filter((d) => d <= thisSunday).sort((a, b) => b.localeCompare(a));
 
   return (
     <div className={cn("flex items-center gap-1.5 rounded-2xl bg-white p-1.5 shadow-soft border", className)}>
@@ -36,7 +37,7 @@ export function SundayPicker({ value, basePath, className }: { value: string; ba
       <button
         type="button"
         onClick={() => go(addDays(value, 7))}
-        disabled={value >= addDays(thisSunday, 7)}
+        disabled={value >= thisSunday}
         className="grid h-12 w-12 place-items-center rounded-xl hover:bg-brand-50 disabled:opacity-30"
         aria-label="다음 주"
       >

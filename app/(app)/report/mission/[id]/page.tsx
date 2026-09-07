@@ -13,7 +13,7 @@ import { Comments } from "@/components/reports/comments";
 import { DeleteReportButton } from "@/components/reports/delete-report-button";
 import { PrintButton } from "@/components/reports/print-button";
 import { aggregateSunReports } from "@/lib/report-utils";
-import { formatKoreanDate, formatDateTime } from "@/lib/dates";
+import { formatKoreanDate, formatDateTime, isOpenReportWeek, reportWeekEnd } from "@/lib/dates";
 import { formatWon } from "@/lib/utils";
 import { getSunsByMission, getMissionName } from "@/lib/constants/sun-directory";
 import type { MissionReport, SunReportWithMembers, SpecialReportItem, ReportComment, SpecialStatus } from "@/types/database";
@@ -50,7 +50,10 @@ export default async function MissionReportDetailPage({
   const specialItems = (items ?? []) as SpecialReportItem[];
 
   const isOwner = profile.role === "mission_leader" && profile.mission_id === r.mission_id;
-  const editing = isOwner && (r.status === "draft" || mode === "edit");
+  // 이번 주 보고 창(주일 0시 ~ 토요일 밤 12시) 안에서만 고칠 수 있다
+  const weekOpen = isOpenReportWeek(r.report_date);
+  const canEdit = isOwner && weekOpen;
+  const editing = canEdit && (r.status === "draft" || mode === "edit");
   const backHref = dashboardPath(profile.role);
 
   return (
@@ -64,12 +67,12 @@ export default async function MissionReportDetailPage({
           <>
             <StatusBadge status={r.status} />
             {!editing && <PrintButton />}
-            {!editing && isOwner && (
+            {!editing && canEdit && (
               <Button variant="secondary" size="sm" href={`/report/mission/${id}?mode=edit`}>
                 수정하기
               </Button>
             )}
-            {((isOwner && r.status === "draft") || profile.role === "pastor") && !editing && (
+            {((canEdit && r.status === "draft") || profile.role === "pastor") && !editing && (
               <DeleteReportButton
                 apiUrl={`/api/reports/mission/${id}`}
                 title="이 선교회보고서를 삭제할까요?"
@@ -91,9 +94,22 @@ export default async function MissionReportDetailPage({
         </div>
       )}
 
-      {editing && isOwner && r.status === "submitted" && (
-        <div className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-base text-amber-900">
+      {editing && canEdit && r.status === "submitted" && (
+        <div className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-base text-amber-900" style={{ wordBreak: "keep-all" }}>
           이미 제출한 보고서예요. 고친 뒤 <b>제출하기</b>를 다시 누르면 담임목사님께 다시 알림이 가요.
+        </div>
+      )}
+
+      {isOwner && weekOpen && (
+        <div className="rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-base text-emerald-900" style={{ wordBreak: "keep-all" }}>
+          이번 주 보고 기간은 <b>{formatKoreanDate(reportWeekEnd(), { year: false })}</b>까지예요. 그때까지는 몇 번이든 고쳐서 다시 낼 수 있어요.
+          순장님이 순보고서를 고치면 합계는 자동으로 다시 계산돼요.
+        </div>
+      )}
+
+      {isOwner && !weekOpen && (
+        <div className="rounded-2xl border border-slate-300 bg-slate-100 px-4 py-3 text-base text-ink-soft" style={{ wordBreak: "keep-all" }}>
+          {formatKoreanDate(r.report_date, { year: false })} 주일 보고 기간은 끝났어요. 이 보고서는 <b>보기만</b> 할 수 있어요.
         </div>
       )}
 

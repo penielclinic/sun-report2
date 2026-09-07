@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { SundayPicker } from "@/components/reports/sunday-picker";
 import { PrintButton } from "@/components/reports/print-button";
 import { DeleteReportButton } from "@/components/reports/delete-report-button";
-import { currentReportSunday, formatKoreanDate, isValidDateString, isSunday } from "@/lib/dates";
+import { formatKoreanDate, resolveReportSunday } from "@/lib/dates";
 import { SUN_DIRECTORY, MISSION_IDS, SUN_COUNT, getMissionName, getSunsByMission } from "@/lib/constants/sun-directory";
 import { ATTEND_COLS, type AttendKey } from "@/types/database";
 import { cn } from "@/lib/utils";
@@ -29,7 +29,7 @@ const HEAD_TONE: Record<AttendKey, string> = {
 export default async function OverviewPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   await requirePage(["pastor"]);
   const { date } = await searchParams;
-  const selected = date && isValidDateString(date) && isSunday(date) ? date : currentReportSunday();
+  const selected = resolveReportSunday(date);
   const supabase = await createClient();
 
   const { data: sunReports } = await supabase.from("sun_reports").select("id, sun_number, mission_id, status, attend_total, bible_chapters").eq("report_date", selected);

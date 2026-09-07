@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { FileText, PartyPopper, Info } from "lucide-react";
+import { FileText, PartyPopper, Info, Lock, RefreshCw } from "lucide-react";
 import { requirePage, dashboardPath } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/misc";
@@ -9,6 +9,7 @@ import { SunReportForm } from "@/components/reports/sun-report-form";
 import { SunReportView } from "@/components/reports/sun-report-view";
 import { Comments } from "@/components/reports/comments";
 import { DeleteReportButton } from "@/components/reports/delete-report-button";
+import { isOpenReportWeek, reportWeekEnd, formatKoreanDate } from "@/lib/dates";
 import type { SunReport, SunReportMember, ReportComment } from "@/types/database";
 
 export const metadata: Metadata = { title: "순보고서" };
@@ -37,7 +38,9 @@ export default async function SunReportDetailPage({
 
   const missionSubmitted = missionReport?.status === "submitted";
   const isOwnerSun = profile.role === "sun_leader" && profile.sun_number === r.sun_number;
-  const canEdit = isOwnerSun;
+  // 이번 주 보고 창(주일 0시 ~ 토요일 밤 12시) 안에서만 고칠 수 있다
+  const weekOpen = isOpenReportWeek(r.report_date);
+  const canEdit = isOwnerSun && weekOpen;
   const editing = canEdit && (r.status === "draft" || mode === "edit");
   const canComment = profile.role === "pastor" || isOwnerSun || (profile.role === "mission_leader" && profile.mission_id === r.mission_id);
   const backHref = dashboardPath(profile.role);
@@ -72,7 +75,25 @@ export default async function SunReportDetailPage({
         </div>
       )}
 
-      {missionSubmitted && isOwnerSun && (
+      {isOwnerSun && weekOpen && !editing && (
+        <div className="rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-base text-emerald-900 flex gap-2" style={{ wordBreak: "keep-all" }}>
+          <RefreshCw className="h-6 w-6 shrink-0" />
+          <span>
+            이번 주 보고 기간은 <b>{formatKoreanDate(reportWeekEnd(), { year: false })}</b>까지예요. 그때까지는 몇 번이든 고쳐서 다시 제출할 수 있어요.
+          </span>
+        </div>
+      )}
+
+      {isOwnerSun && !weekOpen && (
+        <div className="rounded-2xl border border-slate-300 bg-slate-100 px-4 py-3 text-base text-ink-soft flex gap-2" style={{ wordBreak: "keep-all" }}>
+          <Lock className="h-6 w-6 shrink-0" />
+          <span>
+            {formatKoreanDate(r.report_date, { year: false })} 주일 보고 기간은 끝났어요. 이 보고서는 <b>보기만</b> 할 수 있어요. 새 주일 보고서는 홈에서 써 주세요.
+          </span>
+        </div>
+      )}
+
+      {missionSubmitted && isOwnerSun && weekOpen && (
         <div className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-base text-amber-900 flex gap-2">
           <Info className="h-6 w-6 shrink-0" />
           <span>

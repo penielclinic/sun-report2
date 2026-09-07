@@ -48,6 +48,44 @@ export function toSunday(dateStr: string): string {
   return addDays(dateStr, -dayOfWeek(dateStr));
 }
 
+/**
+ * 보고 기간("이번 주 보고 창"):
+ *  - 주일 0시(KST)에 열려 그 주 토요일 밤 12시까지 이어진다.
+ *  - 이 기간에는 순장·선교회장이 몇 번이든 고쳐서 다시 제출할 수 있다.
+ *  - 다음 주일 0시가 되면 새 창이 열리고 지난 주 보고서는 마감(읽기 전용)된다.
+ */
+export function isOpenReportWeek(dateStr: string, now: Date = new Date()): boolean {
+  return dateStr === currentReportSunday(now);
+}
+
+/** 이번 보고 기간의 마지막 날 (토요일) */
+export function reportWeekEnd(now: Date = new Date()): string {
+  return addDays(currentReportSunday(now), 6);
+}
+
+/** 다음 보고 창이 열리는 주일 */
+export function nextReportSunday(now: Date = new Date()): string {
+  return addDays(currentReportSunday(now), 7);
+}
+
+/** 마감됐거나 아직 열리지 않은 주일에 쓰려 할 때 보여줄 안내 문구 */
+export function closedWeekMessage(dateStr: string, now: Date = new Date()): string {
+  const cur = currentReportSunday(now);
+  if (dateStr > cur) {
+    return `${formatShortDate(dateStr)} 주일 보고는 아직 열리지 않았어요. ${formatShortDate(dateStr)} 0시부터 쓸 수 있어요`;
+  }
+  return `${formatShortDate(dateStr)} 주일 보고는 마감되었어요. 지금은 ${formatShortDate(cur)} 주일 보고서만 쓰거나 고칠 수 있어요`;
+}
+
+/**
+ * URL 등으로 받은 주일 파라미터를 안전한 값으로 바꾼다.
+ * 형식이 틀렸거나 일요일이 아니거나 아직 열리지 않은 미래 주일이면 이번 주 주일.
+ */
+export function resolveReportSunday(date: unknown, now: Date = new Date()): string {
+  const cur = currentReportSunday(now);
+  return isValidDateString(date) && isSunday(date) && date <= cur ? date : cur;
+}
+
 export function isSunday(dateStr: string): boolean {
   return dayOfWeek(dateStr) === 0;
 }

@@ -8,7 +8,7 @@ import { StatusBadge } from "@/components/ui/badge";
 import { StatTile } from "@/components/ui/misc";
 import { ReportStatusCard } from "@/components/reports/report-status-card";
 import { RecentMessages } from "@/components/notifications/recent-messages";
-import { currentReportSunday, formatKoreanDate, formatShortDate, recentSundays } from "@/lib/dates";
+import { currentReportSunday, reportWeekEnd, formatKoreanDate, formatShortDate, recentSundays } from "@/lib/dates";
 import { getSunLabel } from "@/lib/constants/sun-directory";
 
 export const metadata: Metadata = { title: "순장 홈" };
@@ -44,10 +44,15 @@ export default async function SunLeaderDashboard() {
       <ReportStatusCard
         status={thisWeek ? thisWeek.status : "none"}
         dateLabel={`${formatKoreanDate(thisSunday)} 주일`}
-        submittedLabel={thisWeek?.status === "submitted" ? `주일낮 ${thisWeek.attend_total}명 · 성경 ${thisWeek.bible_chapters}장` : undefined}
+        submittedLabel={thisWeek?.status === "submitted" ? `주일낮 ${thisWeek.attend_total}명 · 성경 ${thisWeek.bible_chapters}장 — 고쳐서 다시 낼 수 있어요` : undefined}
         href={thisWeek ? `/report/sun/${thisWeek.id}` : "/report/sun/new"}
         ctaLabel={thisWeek?.status === "submitted" ? "제출한 보고서 보기" : thisWeek ? "이어서 작성하기" : "이번 주 순보고서 작성"}
       />
+
+      <p className="px-1 text-base text-ink-soft" style={{ wordBreak: "keep-all" }}>
+        이번 주 보고 기간은 <b>{formatKoreanDate(reportWeekEnd(), { year: false })}</b>까지예요. 그때까지는 몇 번이든 고쳐서 다시 낼 수 있고,
+        다음 주일 0시가 되면 새 주일 보고서가 열려요.
+      </p>
 
       <div className="grid grid-cols-3 gap-2 sm:gap-3 rise-in rise-in-2">
         <StatTile label="최근 8주 제출" value={submitted.length} unit="회" tone="brand" />

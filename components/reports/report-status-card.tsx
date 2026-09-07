@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { CheckCircle2, Clock3, AlertCircle, ChevronRight } from "lucide-react";
+import { CheckCircle2, Clock3, AlertCircle, Lock, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
  * 이번 주 보고 상태를 큼직하게 보여주는 카드 (순장·선교회장 홈)
+ * status="closed" — 보고 기간(주일 0시~토요일)이 지나 새로 쓸 수 없는 주일
  */
 export function ReportStatusCard({
   status,
@@ -12,11 +13,11 @@ export function ReportStatusCard({
   href,
   ctaLabel,
 }: {
-  status: "submitted" | "draft" | "none";
+  status: "submitted" | "draft" | "none" | "closed";
   dateLabel: string;
   submittedLabel?: string;
-  href: string;
-  ctaLabel: string;
+  href?: string;
+  ctaLabel?: string;
 }) {
   const cfg = {
     submitted: {
@@ -37,6 +38,12 @@ export function ReportStatusCard({
       title: "이번 주 보고서를 아직 안 냈어요",
       desc: "아래 버튼을 눌러 작성해 주세요.",
     },
+    closed: {
+      wrap: "from-slate-400 to-slate-600",
+      icon: <Lock className="h-14 w-14" strokeWidth={2.5} />,
+      title: "보고 기간이 끝난 주일이에요",
+      desc: "이 주일에는 보고서가 없어요. 새 보고서는 이번 주 주일로 써 주세요.",
+    },
   }[status];
 
   return (
@@ -49,13 +56,15 @@ export function ReportStatusCard({
           <p className="mt-1 text-base sm:text-lg opacity-95">{cfg.desc}</p>
         </div>
       </div>
-      <Link
-        href={href}
-        className="mt-5 flex h-16 items-center justify-center gap-2 rounded-2xl bg-white text-xl font-black text-ink shadow hover:bg-white/90 active:translate-y-px"
-      >
-        {ctaLabel}
-        <ChevronRight className="h-6 w-6" />
-      </Link>
+      {href && ctaLabel && (
+        <Link
+          href={href}
+          className="mt-5 flex h-16 items-center justify-center gap-2 rounded-2xl bg-white text-xl font-black text-ink shadow hover:bg-white/90 active:translate-y-px"
+        >
+          {ctaLabel}
+          <ChevronRight className="h-6 w-6" />
+        </Link>
+      )}
     </div>
   );
 }

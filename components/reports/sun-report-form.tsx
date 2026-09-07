@@ -12,7 +12,7 @@ import { useConfirm } from "@/components/ui/confirm-dialog";
 import { api } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { ATTEND_COLS, type AttendKey, type Profile, type SunReport, type SunReportMember } from "@/types/database";
-import { formatKoreanDate, isSunday, recentSundays, addDays, currentReportSunday } from "@/lib/dates";
+import { formatKoreanDate, isSunday, addDays } from "@/lib/dates";
 import { getSunLabel } from "@/lib/constants/sun-directory";
 
 interface Props {
@@ -77,7 +77,9 @@ export function SunReportForm({ profile, reportDate, reportId, initialData, defa
   const router = useRouter();
   const confirm = useConfirm();
   const [saving, setSaving] = useState<"draft" | "submitted" | null>(null);
-  const [selectedDate, setSelectedDate] = useState(reportDate);
+  // 보고 주일은 서버가 정한다 (이번 주 보고 창의 주일). 화면에서는 바꿀 수 없다.
+  const selectedDate = reportDate;
+  const weekEnd = addDays(reportDate, 6);
 
   const wa = parseWorshipAt(initialData?.report.worship_at, reportDate);
   const [worshipDate, setWorshipDate] = useState(wa.date);
@@ -216,13 +218,6 @@ export function SunReportForm({ profile, reportDate, reportId, initialData, defa
     }
   }
 
-  const sundayOptions = useMemo(() => {
-    const next = addDays(currentReportSunday(), 7);
-    const list = [next, ...recentSundays(12)];
-    if (!list.includes(selectedDate)) list.push(selectedDate);
-    return [...new Set(list)].sort((a, b) => b.localeCompare(a));
-  }, [selectedDate]);
-
   return (
     <div className="space-y-5 pb-6">
       {/* 기본 정보 */}
@@ -234,15 +229,13 @@ export function SunReportForm({ profile, reportDate, reportId, initialData, defa
           <CardDescription>예배 정보를 확인하고 필요하면 고쳐 주세요.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
-          <Field label="보고 주일" htmlFor="report-date" hint={reportId ? "저장된 보고서의 날짜는 바꿀 수 없어요" : "다른 주일 보고서를 쓰려면 날짜를 바꿔 주세요"}>
-            <Select id="report-date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} disabled={!!reportId}>
-              {sundayOptions.map((d) => (
-                <option key={d} value={d}>
-                  {formatKoreanDate(d)}
-                  {d === currentReportSunday() ? " — 이번 주" : ""}
-                </option>
-              ))}
-            </Select>
+          <Field
+            label="보고 주일"
+            hint={`이번 주 보고 기간은 ${formatKoreanDate(weekEnd, { year: false })}까지예요. 그때까지는 몇 번이든 고쳐서 다시 낼 수 있어요.`}
+          >
+            <div className="flex h-14 items-center rounded-2xl border-2 border-brand-200 bg-brand-50 px-4 text-xl font-black text-brand-800">
+              <span className="whitespace-nowrap">{formatKoreanDate(selectedDate)} 주일</span>
+            </div>
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">

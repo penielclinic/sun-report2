@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SundayPicker } from "@/components/reports/sunday-picker";
 import { PrintButton } from "@/components/reports/print-button";
 import { ExcelButton, type ExcelSheet } from "@/components/admin/excel-button";
-import { currentReportSunday, formatKoreanDate, isValidDateString, isSunday } from "@/lib/dates";
+import { formatKoreanDate, resolveReportSunday } from "@/lib/dates";
 import { SUN_DIRECTORY, getMissionShortName } from "@/lib/constants/sun-directory";
 import { cn } from "@/lib/utils";
 
@@ -75,7 +75,7 @@ function ReportTable({ rows, sp }: { rows: Row[]; sp: number[] }) {
 export default async function WeeklyReportPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   await requirePage(["pastor"]);
   const { date } = await searchParams;
-  const selected = date && isValidDateString(date) && isSunday(date) ? date : currentReportSunday();
+  const selected = resolveReportSunday(date);
   const supabase = await createClient();
   const { data } = await supabase.from("sun_reports").select("sun_number, attend_total, bible_chapters, worship_place, worship_leader, status").eq("report_date", selected);
   const map = new Map((data ?? []).map((r) => [r.sun_number, r]));

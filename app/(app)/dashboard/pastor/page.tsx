@@ -11,7 +11,7 @@ import { SundayPicker } from "@/components/reports/sunday-picker";
 import { AdminTiles } from "@/components/admin/admin-tiles";
 import { RecentMessages } from "@/components/notifications/recent-messages";
 import { ADMIN_MENU } from "@/lib/admin-menu";
-import { currentReportSunday, formatKoreanDate, isValidDateString, isSunday } from "@/lib/dates";
+import { formatKoreanDate, resolveReportSunday } from "@/lib/dates";
 import { MISSION_IDS, SUN_COUNT, MISSION_REPORT_COUNT, BRIDGE_MISSION_ID, getMissionName, getSunsByMission } from "@/lib/constants/sun-directory";
 import { formatWon } from "@/lib/utils";
 
@@ -20,7 +20,7 @@ export const metadata: Metadata = { title: "담임목사 홈" };
 export default async function PastorDashboard({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   const { profile, userId } = await requirePage(["pastor"]);
   const { date } = await searchParams;
-  const selected = date && isValidDateString(date) && isSunday(date) ? date : currentReportSunday();
+  const selected = resolveReportSunday(date);
   const supabase = await createClient();
   const admin = createAdminClient();
 

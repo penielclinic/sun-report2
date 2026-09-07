@@ -9,7 +9,7 @@ import { ProgressBar } from "@/components/ui/misc";
 import { ReportStatusCard } from "@/components/reports/report-status-card";
 import { RecentMessages } from "@/components/notifications/recent-messages";
 import { SundayPicker } from "@/components/reports/sunday-picker";
-import { currentReportSunday, formatKoreanDate, isValidDateString, isSunday } from "@/lib/dates";
+import { formatKoreanDate, resolveReportSunday, isOpenReportWeek, reportWeekEnd } from "@/lib/dates";
 import { getSunsByMission, getMissionName } from "@/lib/constants/sun-directory";
 
 export const metadata: Metadata = { title: "선교회장 홈" };
@@ -17,7 +17,8 @@ export const metadata: Metadata = { title: "선교회장 홈" };
 export default async function MissionLeaderDashboard({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   const { profile, userId } = await requirePage(["mission_leader"]);
   const { date } = await searchParams;
-  const selected = date && isValidDateString(date) && isSunday(date) ? date : currentReportSunday();
+  const selected = resolveReportSunday(date);
+  const weekOpen = isOpenReportWeek(selected);
   const missionId = profile.mission_id ?? 0;
   const entries = getSunsByMission(missionId);
   const supabase = await createClient();
@@ -42,13 +43,36 @@ export default async function MissionLeaderDashboard({ searchParams }: { searchP
 
       <SundayPicker value={selected} basePath="/dashboard/mission-leader" />
 
+      <p className="px-1 text-base text-ink-soft" style={{ wordBreak: "keep-all" }}>
+        {weekOpen ? (
+          <>
+            이번 주 보고 기간은 <b>{formatKoreanDate(reportWeekEnd(), { year: false })}</b>까지예요. 그때까지는 순장님도, 선교회장님도 몇 번이든 고쳐서 다시 낼 수 있어요.
+            다음 주일 0시가 되면 새 주일 보고가 열려요.
+          </>
+        ) : (
+          <>지난 주일이에요. 보고서는 보기만 할 수 있어요.</>
+        )}
+      </p>
+
       <div className="grid gap-4 lg:grid-cols-2">
         <ReportStatusCard
-          status={missionReport ? missionReport.status : "none"}
+          status={missionReport ? missionReport.status : weekOpen ? "none" : "closed"}
           dateLabel={`${formatKoreanDate(selected)} 주일 · 선교회보고서`}
-          submittedLabel="담임목사님께 전달되었어요."
-          href={missionReport ? `/report/mission/${missionReport.id}` : `/report/mission/new?date=${selected}`}
-          ctaLabel={missionReport?.status === "submitted" ? "제출한 보고서 보기" : missionReport ? "이어서 작성하기" : "선교회보고서 작성"}
+          submittedLabel={
+            weekOpen
+              ? `담임목사님께 전달되었어요. ${formatKoreanDate(reportWeekEnd(), { year: false })}까지 고쳐서 다시 낼 수 있어요.`
+              : "담임목사님께 전달되었어요."
+          }
+          href={missionReport ? `/report/mission/${missionReport.id}` : weekOpen ? "/report/mission/new" : undefined}
+          ctaLabel={
+            missionReport
+              ? missionReport.status === "submitted"
+                ? "제출한 보고서 보기"
+                : "이어서 작성하기"
+              : weekOpen
+                ? "선교회보고서 작성"
+                : undefined
+          }
         />
 
         <Card tone="brand" className="rise-in rise-in-2 p-6 flex flex-col justify-between">

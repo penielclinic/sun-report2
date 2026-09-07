@@ -6,14 +6,14 @@ import { PageHeader } from "@/components/ui/misc";
 import { SundayPicker } from "@/components/reports/sunday-picker";
 import { BriefingPanel } from "./briefing-panel";
 import { briefingEnabled } from "@/lib/briefing.server";
-import { currentReportSunday, formatKoreanDate, isValidDateString, isSunday } from "@/lib/dates";
+import { formatKoreanDate, resolveReportSunday } from "@/lib/dates";
 
 export const metadata: Metadata = { title: "AI 목회 브리핑" };
 
 export default async function BriefingPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   await requirePage(["pastor"]);
   const { date } = await searchParams;
-  const selected = date && isValidDateString(date) && isSunday(date) ? date : currentReportSunday();
+  const selected = resolveReportSunday(date);
   const supabase = await createClient();
   const { data } = await supabase.from("pastoral_briefings").select("briefing_text, care_members, joy_news, generated_at").eq("week_of", selected).maybeSingle();
 

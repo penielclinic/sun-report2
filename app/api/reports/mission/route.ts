@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requireApi, jsonError } from "@/lib/auth/session";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { missionReportSchema, firstIssue } from "@/lib/validation";
-import { isSunday, todayKST, addDays } from "@/lib/dates";
+import { isSunday, isOpenReportWeek, closedWeekMessage } from "@/lib/dates";
 import { aggregateSunReports } from "@/lib/report-utils";
 import { notify, pastorIds } from "@/lib/notify";
 import { createKeywordAlert } from "@/lib/alerts";
@@ -24,7 +24,8 @@ export async function POST(request: Request) {
   if (!parsed.success) return jsonError(firstIssue(parsed.error));
   const input = parsed.data;
   if (!isSunday(input.report_date)) return jsonError("보고 날짜는 주일(일요일)이어야 해요");
-  if (input.report_date > addDays(todayKST(), 7)) return jsonError("너무 먼 미래 날짜예요");
+  // 이번 주 보고 창(주일 0시 ~ 토요일 밤 12시) 안에서만 쓰고 고칠 수 있다
+  if (!isOpenReportWeek(input.report_date)) return jsonError(closedWeekMessage(input.report_date), 409);
 
   const admin = createAdminClient();
 
