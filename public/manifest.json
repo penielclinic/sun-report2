@@ -1,0 +1,14 @@
+{
+  "name": "순보고 — 해운대순복음교회",
+  "short_name": "순보고",
+  "description": "해운대순복음교회 순장·선교회장·담임목사를 위한 주간 보고 앱",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbf8f1",
+  "theme_color": "#2447ea",
+  "orientation": "portrait",
+  "lang": "ko",
+  "icons": [
+    { "src": "/logo.png", "sizes": "any", "type": "image/png", "purpose": "any" }
+  ]
+}

@@ -1,0 +1,7 @@
+import { requirePage } from "@/lib/auth/session";
+import { AppShell } from "@/components/layout/app-shell";
+
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const { profile } = await requirePage();
+  return <AppShell profile={profile}>{children}</AppShell>;
+}
