@@ -27,7 +27,7 @@ export default async function NewSunReportPage({ searchParams }: { searchParams:
     .maybeSingle();
   if (existing) redirect(`/report/sun/${existing.id}`);
 
-  const names = await defaultMemberNames(profile.sun_number, profile.name);
+  const { names, sortedByAttendance } = await defaultMemberNames(profile.sun_number, profile.name);
 
   return (
     <div className="space-y-5">
@@ -37,7 +37,14 @@ export default async function NewSunReportPage({ searchParams }: { searchParams:
         icon={<FilePenLine className="h-7 w-7" />}
         back={{ href: "/dashboard/sun-leader", label: "홈으로" }}
       />
-      <SunReportForm profile={profile} reportDate={reportDate} reportId={null} initialData={null} defaultMembers={names} />
+      <SunReportForm
+        profile={profile}
+        reportDate={reportDate}
+        reportId={null}
+        initialData={null}
+        defaultMembers={names}
+        sortedByAttendance={sortedByAttendance}
+      />
     </div>
   );
 }

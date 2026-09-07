@@ -22,6 +22,8 @@ interface Props {
   initialData: { report: SunReport; members: SunReportMember[] } | null;
   /** 새 보고서의 기본 순원 명단 */
   defaultMembers: string[];
+  /** 기본 명단을 과거 출석 기록 순으로 정렬했는지 (안내 문구 표시용) */
+  sortedByAttendance?: boolean;
 }
 
 type MemberRow = {
@@ -71,7 +73,7 @@ const CHECK_TONE: Record<AttendKey, "indigo" | "violet" | "amber" | "rose" | "em
 
 const DRAFT_KEY = (sun: number, date: string) => `sunbogo:draft:${sun}:${date}`;
 
-export function SunReportForm({ profile, reportDate, reportId, initialData, defaultMembers }: Props) {
+export function SunReportForm({ profile, reportDate, reportId, initialData, defaultMembers, sortedByAttendance = false }: Props) {
   const router = useRouter();
   const confirm = useConfirm();
   const [saving, setSaving] = useState<"draft" | "submitted" | null>(null);
@@ -301,7 +303,15 @@ export function SunReportForm({ profile, reportDate, reportId, initialData, defa
             <CardTitle icon={<Users className="h-6 w-6 text-emerald-600" />}>
               순원 출석 체크 <span className="text-base font-bold text-ink-soft">({validCount}명)</span>
             </CardTitle>
-            <CardDescription>이름 옆 네모를 누르면 체크돼요. 이름을 누르면 성경장수·메모를 적을 수 있어요.</CardDescription>
+            <CardDescription>
+              이름 옆 네모를 누르면 체크돼요. 이름을 누르면 성경장수·메모를 적을 수 있어요.
+              {sortedByAttendance && !reportId && (
+                <>
+                  <br />
+                  <b>최근 출석하신 분이 위에</b>, 출석 기록이 없는 분이 아래에 있어요.
+                </>
+              )}
+            </CardDescription>
           </div>
         </CardHeader>
 
