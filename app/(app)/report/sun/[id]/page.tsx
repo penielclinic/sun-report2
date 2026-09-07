@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { FileText, PartyPopper, Lock } from "lucide-react";
+import { FileText, PartyPopper, Info } from "lucide-react";
 import { requirePage, dashboardPath } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/misc";
@@ -35,9 +35,9 @@ export default async function SunReportDetailPage({
     supabase.from("mission_reports").select("status").eq("mission_id", r.mission_id).eq("report_date", r.report_date).maybeSingle(),
   ]);
 
-  const locked = missionReport?.status === "submitted";
+  const missionSubmitted = missionReport?.status === "submitted";
   const isOwnerSun = profile.role === "sun_leader" && profile.sun_number === r.sun_number;
-  const canEdit = isOwnerSun && !locked;
+  const canEdit = isOwnerSun;
   const editing = canEdit && (r.status === "draft" || mode === "edit");
   const canComment = profile.role === "pastor" || isOwnerSun || (profile.role === "mission_leader" && profile.mission_id === r.mission_id);
   const backHref = dashboardPath(profile.role);
@@ -46,8 +46,7 @@ export default async function SunReportDetailPage({
     <div className="space-y-5">
       <PageHeader
         title={editing ? "순보고서 수정" : "순보고서"}
-        subtitle={locked ? "선교회보고서가 제출되어 수정할 수 없어요" : undefined}
-        icon={locked ? <Lock className="h-7 w-7" /> : <FileText className="h-7 w-7" />}
+        icon={<FileText className="h-7 w-7" />}
         back={{ href: backHref, label: "홈으로" }}
         action={
           !editing && canEdit ? (
@@ -70,6 +69,15 @@ export default async function SunReportDetailPage({
             <p className="text-2xl font-black">제출 완료! 수고하셨어요 🙏</p>
             <p className="text-base opacity-95">선교회장님께 알림이 갔어요. 홈으로 돌아가셔도 돼요.</p>
           </div>
+        </div>
+      )}
+
+      {missionSubmitted && isOwnerSun && (
+        <div className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-base text-amber-900 flex gap-2">
+          <Info className="h-6 w-6 shrink-0" />
+          <span>
+            선교회장님이 이 주 선교회보고서를 이미 제출했어요. 그래도 고쳐서 <b>다시 제출</b>할 수 있어요. 고치면 선교회보고서 합계가 자동으로 맞춰지고 선교회장님께 알림이 가요.
+          </span>
         </div>
       )}
 

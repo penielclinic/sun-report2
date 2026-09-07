@@ -48,7 +48,7 @@ export function MissionReportForm({ reportDate, reportId, initialData, aggregate
     if (status === "submitted") {
       const ok = await confirm({
         title: "선교회보고서를 제출할까요?",
-        description: `${formatKoreanDate(reportDate)} 주일\n제출 순 ${aggregated.total_sun}개 · 주일낮 ${aggregated.total_attend}명 · 헌금 ${(parseInt(offering) || 0).toLocaleString()}원\n\n제출하면 순장님들의 이 주 보고서는 더 이상 수정할 수 없어요.`,
+        description: `${formatKoreanDate(reportDate)} 주일\n제출 순 ${aggregated.total_sun}개 · 주일낮 ${aggregated.total_attend}명 · 헌금 ${(parseInt(offering) || 0).toLocaleString()}원\n\n제출 후 순장님이 보고서를 고치면 합계가 자동으로 맞춰지고 알림이 와요. 그때 다시 제출하면 돼요.`,
         confirmLabel: "제출하기",
       });
       if (!ok) return;

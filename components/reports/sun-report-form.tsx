@@ -174,7 +174,7 @@ export function SunReportForm({ profile, reportDate, reportId, initialData, defa
     if (status === "submitted") {
       const ok = await confirm({
         title: "보고서를 제출할까요?",
-        description: `${formatKoreanDate(selectedDate)} 주일\n주일낮예배 ${counts.attend_sun_day}명 · 순모임 ${counts.attend_sun}명 · 성경 ${bibleChapters}장\n\n제출 후에도 선교회장님이 선교회보고서를 내기 전까지는 수정할 수 있어요.`,
+        description: `${formatKoreanDate(selectedDate)} 주일\n주일낮예배 ${counts.attend_sun_day}명 · 순모임 ${counts.attend_sun}명 · 성경 ${bibleChapters}장\n\n제출 후에도 언제든 고쳐서 다시 제출할 수 있어요.`,
         confirmLabel: "제출하기",
       });
       if (!ok) return;
