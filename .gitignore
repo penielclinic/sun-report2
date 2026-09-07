@@ -14,3 +14,8 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# 개인정보가 담긴 명단 파일 (공개 저장소에 올리지 않음)
+/*.xlsx
+/*.png
+/*.csv

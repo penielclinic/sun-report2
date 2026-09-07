@@ -12,8 +12,15 @@ import { notify, pastorIds } from "@/lib/notify";
  * 회원가입 (본인 신청 → 승인 대기) 또는 담임목사가 직접 계정 생성 (auto_approve)
  */
 export async function POST(request: Request) {
-  const rl = rateLimit(`register:${clientIp(request)}`, 10, 60 * 60 * 1000);
-  if (!rl.ok) return NextResponse.json({ error: "가입 시도가 너무 많아요. 잠시 후 다시 시도해 주세요" }, { status: 429 });
+  // 담임목사가 로그인한 채로 계정을 만드는 경우(사용자 관리 · 명단 일괄 등록)는
+  // 무차별 가입 방지용 속도제한 대상이 아니므로 건너뛴다.
+  const session = await getSession();
+  const byPastor = session?.profile.role === "pastor" && session.profile.status === "active";
+
+  if (!byPastor) {
+    const rl = rateLimit(`register:${clientIp(request)}`, 10, 60 * 60 * 1000);
+    if (!rl.ok) return NextResponse.json({ error: "가입 시도가 너무 많아요. 잠시 후 다시 시도해 주세요" }, { status: 429 });
+  }
 
   const raw = await request.json().catch(() => null);
   const parsed = registerSchema.safeParse(raw);
@@ -26,9 +33,6 @@ export async function POST(request: Request) {
   const pinErr = validatePin(pin);
   if (pinErr) return NextResponse.json({ error: pinErr }, { status: 400 });
 
-  // 담임목사가 직접 생성하는 경우에만 즉시 활성화
-  const session = await getSession();
-  const byPastor = session?.profile.role === "pastor" && session.profile.status === "active";
   const autoApprove = byPastor && raw?.auto_approve === true;
 
   let derivedMission: number | null = null;
