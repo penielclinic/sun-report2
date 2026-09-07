@@ -145,6 +145,9 @@ export function AppShell({ profile, children }: { profile: Profile; children: Re
             </nav>
 
             <div className="flex items-center gap-2">
+              <Link href="/settings" className="hidden sm:grid h-11 w-11 place-items-center rounded-full bg-white/15 hover:bg-white/25" title="내 설정 · 비밀번호 바꾸기" aria-label="내 설정">
+                <Settings className="h-6 w-6" />
+              </Link>
               <Link href="/guide" className="hidden sm:grid h-11 w-11 place-items-center rounded-full bg-white/15 hover:bg-white/25" title="사용설명서" aria-label="사용설명서">
                 <HelpCircle className="h-6 w-6" />
               </Link>

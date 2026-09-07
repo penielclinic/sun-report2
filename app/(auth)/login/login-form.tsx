@@ -109,6 +109,10 @@ export function LoginForm({ initialError }: { initialError?: string }) {
         {loading ? "로그인 중..." : "로그인"}
       </Button>
 
+      <Link href="/forgot" className="block text-center text-base font-bold text-ink-soft underline underline-offset-4 py-1">
+        비밀번호를 잊으셨나요?
+      </Link>
+
       <Link
         href="/register"
         className="flex h-15 items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-brand-300 bg-brand-50/60 text-lg font-bold text-brand-800 hover:bg-brand-100"

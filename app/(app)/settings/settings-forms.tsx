@@ -27,10 +27,10 @@ export function SettingsForms({ phone: initialPhone }: { phone: string }) {
     setPinLoading(true);
     try {
       await api("/api/auth/pin", { body: { current_pin: cur, new_pin: n1 } });
-      toast.success("비밀번호를 바꿨어요");
-      setCur("");
-      setN1("");
-      setN2("");
+      toast.success("비밀번호를 바꿨어요. 새 비밀번호로 다시 로그인해 주세요", { duration: 6000 });
+      router.replace("/login");
+      router.refresh();
+      return;
     } catch (er) {
       toast.error((er as Error).message);
     } finally {
@@ -59,6 +59,7 @@ export function SettingsForms({ phone: initialPhone }: { phone: string }) {
       <Card className="rise-in rise-in-3">
         <CardHeader>
           <CardTitle icon={<Phone className="h-6 w-6 text-emerald-600" />}>전화번호</CardTitle>
+          <CardDescription>비밀번호를 잊었을 때 본인 확인에 쓰여요. 꼭 등록해 두세요.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={savePhone} className="flex gap-2 items-end">
@@ -75,7 +76,7 @@ export function SettingsForms({ phone: initialPhone }: { phone: string }) {
       <Card className="rise-in rise-in-3">
         <CardHeader>
           <CardTitle icon={<KeyRound className="h-6 w-6 text-amber-600" />}>비밀번호 바꾸기</CardTitle>
-          <CardDescription>숫자 4~8자리. 비밀번호를 잊으셨다면 담임목사님이 새로 정해 드릴 수 있어요.</CardDescription>
+          <CardDescription>숫자 4~8자리. 전화번호를 등록해 두면 비밀번호를 잊어도 로그인 화면에서 직접 새로 정할 수 있어요.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={changePin} className="space-y-4">

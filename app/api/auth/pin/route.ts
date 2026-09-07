@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { loginIdToEmail, validatePin, normalizePhone } from "@/lib/auth/login-id";
 import { pinToPassword } from "@/lib/auth/pin.server";
 import { createClient as createPlainClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
 
 const schema = z.object({
   current_pin: z.string().regex(/^\d{4,8}$/),
@@ -35,7 +36,10 @@ export async function POST(request: Request) {
   const { error: updErr } = await admin.auth.admin.updateUserById(session.userId, { password: pinToPassword(email, new_pin) });
   if (updErr) return NextResponse.json({ error: updErr.message }, { status: 400 });
 
-  return NextResponse.json({ ok: true });
+  // 비밀번호가 바뀌면 기존 세션은 무효화되므로 깔끔하게 로그아웃 → 새 비밀번호로 다시 로그인
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  return NextResponse.json({ ok: true, relogin: true });
 }
 
 const phoneSchema = z.object({ phone: z.string().trim().max(20) });

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutGrid, BarChart3, Download, Users, Trophy, UsersRound, ClipboardList, HeartHandshake, Send, BookOpen, HelpCircle, ChevronRight } from "lucide-react";
+import { LayoutGrid, BarChart3, Download, Users, Trophy, UsersRound, ClipboardList, HeartHandshake, Send, BookOpen, HelpCircle, Settings, ChevronRight } from "lucide-react";
 import { ADMIN_MENU, type AdminMenuItem } from "@/lib/admin-menu";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +15,7 @@ const ICON: Record<AdminMenuItem["icon"], React.ReactNode> = {
   send: <Send className="h-7 w-7" />,
   book: <BookOpen className="h-7 w-7" />,
   help: <HelpCircle className="h-7 w-7" />,
+  settings: <Settings className="h-7 w-7" />,
 };
 
 const TONE: Record<AdminMenuItem["tone"], string> = {

@@ -2,7 +2,7 @@ export interface AdminMenuItem {
   href: string;
   title: string;
   desc: string;
-  icon: "grid" | "chart" | "download" | "users" | "trophy" | "people" | "clipboard" | "heart" | "send" | "book" | "help";
+  icon: "grid" | "chart" | "download" | "users" | "trophy" | "people" | "clipboard" | "heart" | "send" | "book" | "help" | "settings";
   tone: "brand" | "emerald" | "amber" | "violet" | "rose" | "sky" | "gold" | "orange";
 }
 
@@ -18,5 +18,6 @@ export const ADMIN_MENU: AdminMenuItem[] = [
   { href: "/admin/members", title: "순원 명단", desc: "45순 편성표 · 이름 검색", icon: "people", tone: "emerald" },
   { href: "/admin/users", title: "사용자 관리", desc: "가입 승인 · 계정 생성 · 비밀번호 초기화", icon: "users", tone: "brand" },
   { href: "/admin/briefing", title: "AI 목회 브리핑", desc: "이번 주 보고서를 요약한 목회 노트", icon: "book", tone: "violet" },
+  { href: "/settings", title: "내 설정 · 비밀번호", desc: "내 비밀번호 바꾸기 · 전화번호 · 글자 크기", icon: "settings", tone: "sky" },
   { href: "/guide", title: "사용설명서", desc: "역할별 이용 안내", icon: "help", tone: "emerald" },
 ];
