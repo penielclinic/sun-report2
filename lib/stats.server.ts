@@ -1,5 +1,7 @@
 import "server-only";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { ATTEND_COLS, type AttendKey } from "@/types/database";
 import { addDays, currentReportSunday, todayKST } from "@/lib/dates";
 
@@ -51,9 +53,12 @@ function emptyPoint(key: string, period: Period): PeriodPoint {
   return { key, label: bucketLabel(key, period), attend_samil: 0, attend_friday: 0, attend_sun_day: 0, attend_sun_eve: 0, attend_sun: 0, evangelism: 0, bible: 0, offering: 0, reports: 0 };
 }
 
-/** 기간별 집계 (담임목사 통계·PDF 공용) */
-export async function loadStatistics(period: Period) {
-  const supabase = await createClient();
+/**
+ * 기간별 집계 (담임목사 통계·PDF·공개 통계 공용)
+ * client 를 넘기지 않으면 로그인한 사용자 세션(RLS 적용)으로 읽는다.
+ */
+export async function loadStatistics(period: Period, client?: SupabaseClient) {
+  const supabase = client ?? (await createClient());
   const since = sinceFor(period);
 
   const { data: sunReports } = await supabase
@@ -122,4 +127,13 @@ export async function loadStatistics(period: Period) {
   }
 
   return { period, since, points, latest, missionAttend };
+}
+
+/**
+ * 로그인 없이 보는 공개 통계.
+ * RLS 는 로그인한 사용자에게만 열려 있으므로 서비스 롤로 읽되,
+ * 화면으로 나가는 값은 사람 이름·연락처가 없는 숫자 합계뿐이다.
+ */
+export async function loadPublicStatistics(period: Period) {
+  return loadStatistics(period, createAdminClient());
 }

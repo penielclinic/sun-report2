@@ -1,7 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/register", "/forgot", "/pending", "/guide", "/offline"];
+// /stats — 로그인 없이 누구나 보는 전체 통계 (숫자 합계만, 개인 정보 없음)
+const PUBLIC_PATHS = ["/login", "/register", "/forgot", "/pending", "/guide", "/stats", "/offline"];
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
