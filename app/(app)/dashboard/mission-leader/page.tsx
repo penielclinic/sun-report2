@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ChevronRight, CheckCircle2, Clock3, CircleDashed, Users } from "lucide-react";
 import { requirePage } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/ui/misc";
@@ -11,6 +12,9 @@ import { RecentMessages } from "@/components/notifications/recent-messages";
 import { SundayPicker } from "@/components/reports/sunday-picker";
 import { formatKoreanDate, resolveReportSunday, isOpenReportWeek, reportWeekEnd } from "@/lib/dates";
 import { getSunsByMission, getMissionName } from "@/lib/constants/sun-directory";
+import { BibleCompletionList } from "@/components/reports/bible-completion-list";
+import { fetchSunLevelCompletions } from "@/lib/bible-completion.server";
+import { UpdateNotice } from "@/components/layout/update-notice";
 
 export const metadata: Metadata = { title: "선교회장 홈" };
 
@@ -28,12 +32,17 @@ export default async function MissionLeaderDashboard({ searchParams }: { searchP
     supabase.from("mission_reports").select("id, status").eq("mission_id", missionId).eq("report_date", selected).maybeSingle(),
   ]);
 
+  // 소속 순이 체크한 통독·필사 (선교회보고서 제출 전에도 보인다)
+  const bibleDone = await fetchSunLevelCompletions(createAdminClient(), missionId, selected);
+
   const map = new Map((sunReports ?? []).map((r) => [r.sun_number, r]));
   const submittedCount = (sunReports ?? []).filter((r) => r.status === "submitted").length;
   const total = entries.length;
 
   return (
     <div className="space-y-5">
+      <UpdateNotice />
+
       <div className="rise-in">
         <h1 className="text-2xl sm:text-3xl font-black">
           {profile.name} 선교회장님, 안녕하세요 👋
@@ -140,6 +149,14 @@ export default async function MissionLeaderDashboard({ searchParams }: { searchP
           </ul>
         </CardContent>
       </Card>
+
+      <BibleCompletionList
+        completions={bibleDone}
+        title="성경통독 · 필사 보고"
+        description="순장님들이 체크하신 내용이 저절로 모여요. 따로 적으실 필요가 없어요."
+        emptyText="이번 주에는 통독·필사를 마치신 분이 없어요."
+        className="rise-in rise-in-3"
+      />
 
       <RecentMessages userId={userId} />
     </div>

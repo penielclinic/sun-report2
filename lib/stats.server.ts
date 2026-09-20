@@ -61,26 +61,35 @@ export async function loadStatistics(period: Period, client?: SupabaseClient) {
   const supabase = client ?? (await createClient());
   const since = sinceFor(period);
 
+  // Supabase 는 한 번에 1000행만 돌려주므로(기본값) 집계가 조용히 잘린다 — 넉넉히 올려 잡는다
   const { data: sunReports } = await supabase
     .from("sun_reports")
     .select("id, report_date, mission_id, attend_total, bible_chapters, offering")
     .eq("status", "submitted")
     .gte("report_date", since)
-    .order("report_date");
+    .order("report_date")
+    .limit(20000);
   const reports = sunReports ?? [];
   const ids = reports.map((r) => r.id);
 
   type MRow = Record<AttendKey, boolean> & { report_id: string };
   let members: MRow[] = [];
+  // 한 보고서에 순원이 20명 안팎이라 200개씩 묶으면 4000행쯤 된다 — 1000행 기본 제한을 반드시 올려야 한다
   for (let i = 0; i < ids.length; i += 200) {
     const { data } = await supabase
       .from("sun_report_members")
       .select("report_id, attend_samil, attend_friday, attend_sun_day, attend_sun_eve, attend_sun, evangelism")
-      .in("report_id", ids.slice(i, i + 200));
+      .in("report_id", ids.slice(i, i + 200))
+      .limit(20000);
     members = members.concat((data ?? []) as MRow[]);
   }
 
-  const { data: missionReports } = await supabase.from("mission_reports").select("report_date, mission_id, total_offering").eq("status", "submitted").gte("report_date", since);
+  const { data: missionReports } = await supabase
+    .from("mission_reports")
+    .select("report_date, mission_id, total_offering")
+    .eq("status", "submitted")
+    .gte("report_date", since)
+    .limit(20000);
 
   const buckets = new Map<string, PeriodPoint>();
   const get = (date: string) => {

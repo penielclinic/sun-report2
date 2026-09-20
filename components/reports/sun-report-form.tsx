@@ -37,6 +37,10 @@ type MemberRow = {
   bulletin_recv: boolean;
   bible_read: number;
   member_note: string;
+  /** 성경통독 완료 — 다 마친 그 주에 한 번만 체크 */
+  bible_tongdok: boolean;
+  /** 성경필사 완료 — 다 마친 그 주에 한 번만 체크 */
+  bible_pilsa: boolean;
 };
 
 const emptyMember = (name = ""): MemberRow => ({
@@ -50,6 +54,8 @@ const emptyMember = (name = ""): MemberRow => ({
   bulletin_recv: false,
   bible_read: 0,
   member_note: "",
+  bible_tongdok: false,
+  bible_pilsa: false,
 });
 
 const WORSHIP_TIMES = ["오전 10시", "오전 11시", "오후 1시", "오후 2시", "오후 3시", "오후 7시", "오후 8시"];
@@ -104,6 +110,8 @@ export function SunReportForm({ profile, reportDate, reportId, initialData, defa
           bulletin_recv: m.bulletin_recv,
           bible_read: m.bible_read,
           member_note: m.member_note ?? "",
+          bible_tongdok: m.bible_tongdok ?? false,
+          bible_pilsa: m.bible_pilsa ?? false,
         }))
       : defaultMembers.map((n) => emptyMember(n))
   );
@@ -298,6 +306,8 @@ export function SunReportForm({ profile, reportDate, reportId, initialData, defa
             </CardTitle>
             <CardDescription>
               이름 옆 네모를 누르면 체크돼요. 이름을 누르면 성경장수·메모를 적을 수 있어요.
+              <br />
+              <b className="text-gold-600">성경통독·필사를 다 마치신 순원</b>은 이름을 눌러 체크해 주세요. (마친 그 주에 한 번만)
               {sortedByAttendance && !reportId && (
                 <>
                   <br />
@@ -346,6 +356,11 @@ export function SunReportForm({ profile, reportDate, reportId, initialData, defa
                         >
                           <span className="truncate">{m.member_name || "(이름 없음)"}</span>
                           {m.bible_read > 0 && <span className="text-sm font-bold text-emerald-700 whitespace-nowrap">📖 {m.bible_read}장</span>}
+                          {(m.bible_tongdok || m.bible_pilsa) && (
+                            <span className="rounded-full bg-gold-100 px-2 py-0.5 text-sm font-black text-gold-700 whitespace-nowrap">
+                              {[m.bible_tongdok && "통독", m.bible_pilsa && "필사"].filter(Boolean).join("·")}
+                            </span>
+                          )}
                           {m.member_note && <span className="text-sm text-slate-500">📝</span>}
                         </button>
                       )}
@@ -398,6 +413,24 @@ export function SunReportForm({ profile, reportDate, reportId, initialData, defa
                         <div>
                           <Label>주보 전달</Label>
                           <BigCheck checked={m.bulletin_recv} onChange={(v) => update(idx, { bulletin_recv: v })} label={m.bulletin_recv ? "전달했어요" : "안 했어요"} tone="brand" />
+                        </div>
+                      </div>
+                      {/* 성경통독·필사 완료 — 다 마친 주에 한 번만 체크하면 목사님께 보고된다 */}
+                      <div className="rounded-2xl border-2 border-gold-200 bg-gold-50/60 p-3">
+                        <Label>성경을 다 마치셨나요? (마친 주에 한 번만)</Label>
+                        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                          <BigCheck
+                            checked={m.bible_tongdok}
+                            onChange={(v) => update(idx, { bible_tongdok: v })}
+                            label="성경통독 완료"
+                            tone="violet"
+                          />
+                          <BigCheck
+                            checked={m.bible_pilsa}
+                            onChange={(v) => update(idx, { bible_pilsa: v })}
+                            label="성경필사 완료"
+                            tone="amber"
+                          />
                         </div>
                       </div>
                       <Field label="개별 메모 (선택)" htmlFor={`note-${idx}`}>

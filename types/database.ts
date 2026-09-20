@@ -59,6 +59,10 @@ export interface SunReportMember {
   bulletin_recv: boolean;
   bible_read: number;
   member_note: string | null;
+  /** 성경통독 완료 (다 마친 주에 한 번만 체크) */
+  bible_tongdok: boolean;
+  /** 성경필사 완료 (다 마친 주에 한 번만 체크) */
+  bible_pilsa: boolean;
 }
 
 export type AttendKey =

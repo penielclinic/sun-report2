@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronRight, CheckCircle2, Clock3, CircleDashed, Church } from "lucide-react";
+import { ChevronRight, CheckCircle2, Clock3, CircleDashed, Church, BarChart3 } from "lucide-react";
 import { requirePage } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -14,6 +14,9 @@ import { ADMIN_MENU } from "@/lib/admin-menu";
 import { formatKoreanDate, resolveReportSunday } from "@/lib/dates";
 import { MISSION_IDS, SUN_COUNT, MISSION_REPORT_COUNT, BRIDGE_MISSION_ID, getMissionName, getSunsByMission } from "@/lib/constants/sun-directory";
 import { formatWon } from "@/lib/utils";
+import { BibleCompletionList } from "@/components/reports/bible-completion-list";
+import { fetchReportedCompletions } from "@/lib/bible-completion.server";
+import { UpdateNotice } from "@/components/layout/update-notice";
 
 export const metadata: Metadata = { title: "담임목사 홈" };
 
@@ -31,6 +34,9 @@ export default async function PastorDashboard({ searchParams }: { searchParams: 
     admin.from("pastoral_alerts").select("id", { count: "exact", head: true }).eq("is_read", false),
   ]);
 
+  // 선교회장이 제출한 보고에 담긴 통독·필사 완료자 (브릿지선교회는 순보고서 제출로 갈음)
+  const bibleDone = await fetchReportedCompletions(admin, selected, selected);
+
   const suns = sunReports ?? [];
   const missions = missionReports ?? [];
   const submittedSuns = suns.filter((r) => r.status === "submitted");
@@ -42,6 +48,8 @@ export default async function PastorDashboard({ searchParams }: { searchParams: 
 
   return (
     <div className="space-y-5">
+      <UpdateNotice />
+
       <div className="rise-in">
         <h1 className="text-2xl sm:text-3xl font-black">{profile.name} 목사님, 안녕하세요 🙏</h1>
         <p className="text-lg text-ink-soft">{formatKoreanDate(selected)} 주일 전체 보고 현황</p>
@@ -133,6 +141,28 @@ export default async function PastorDashboard({ searchParams }: { searchParams: 
           </ul>
         </CardContent>
       </Card>
+
+      <BibleCompletionList
+        completions={bibleDone}
+        title="성경통독 · 필사 보고"
+        description="선교회장님이 제출한 보고에 담긴 완료자예요."
+        emptyText="이번 주에는 통독·필사를 마치신 분이 없어요."
+        className="rise-in rise-in-4"
+      />
+
+      <Link
+        href="/stats"
+        className="flex items-center gap-4 rounded-3xl bg-gradient-to-r from-brand-600 via-violet-600 to-fuchsia-600 px-5 py-4 text-white shadow-pop hover:brightness-110 active:translate-y-px rise-in rise-in-4"
+      >
+        <span className="grid h-13 w-13 shrink-0 place-items-center rounded-2xl bg-white/20">
+          <BarChart3 className="h-7 w-7" strokeWidth={2.5} />
+        </span>
+        <span className="min-w-0 flex-1" style={{ wordBreak: "keep-all" }}>
+          <span className="block text-xl font-black leading-snug">전체 통계 현황</span>
+          <span className="block text-base leading-snug opacity-95">로그인 없이 누구나 볼 수 있는 화면이에요</span>
+        </span>
+        <ChevronRight className="h-7 w-7 shrink-0 opacity-90" />
+      </Link>
 
       <RecentMessages userId={userId} />
     </div>

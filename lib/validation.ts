@@ -17,6 +17,8 @@ export const memberSchema = z.object({
   bulletin_recv: boolDefault,
   bible_read: z.coerce.number().int().min(0).max(2000).default(0),
   member_note: z.string().trim().max(300).nullable().optional(),
+  bible_tongdok: boolDefault,
+  bible_pilsa: boolDefault,
 });
 
 export const sunReportSchema = z.object({

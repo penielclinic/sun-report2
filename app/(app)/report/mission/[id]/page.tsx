@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MissionReportForm } from "@/components/reports/mission-report-form";
 import { MissionSummary } from "@/components/reports/mission-summary";
+import { BibleCompletionList } from "@/components/reports/bible-completion-list";
+import { fetchSunLevelCompletions } from "@/lib/bible-completion.server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { Comments } from "@/components/reports/comments";
 import { DeleteReportButton } from "@/components/reports/delete-report-button";
 import { PrintButton } from "@/components/reports/print-button";
@@ -48,6 +51,7 @@ export default async function MissionReportDetailPage({
   const aggregated = aggregateSunReports(reports);
   const entries = getSunsByMission(r.mission_id).map((e) => ({ sunNumber: e.sunNumber, sunLeader: e.sunLeader, missionId: e.missionId }));
   const specialItems = (items ?? []) as SpecialReportItem[];
+  const bibleDone = await fetchSunLevelCompletions(createAdminClient(), r.mission_id, r.report_date);
 
   const isOwner = profile.role === "mission_leader" && profile.mission_id === r.mission_id;
   // 이번 주 보고 창(주일 0시 ~ 토요일 밤 12시) 안에서만 고칠 수 있다
@@ -114,6 +118,11 @@ export default async function MissionReportDetailPage({
       )}
 
       <MissionSummary sunEntries={entries} sunReports={reports} aggregated={aggregated} totalOffering={r.total_offering} />
+      <BibleCompletionList
+        completions={bibleDone}
+        description="순장님들이 체크하신 내용이 저절로 모여 목사님께 함께 보고돼요."
+        emptyText="이번 주에는 통독·필사를 마치신 분이 없어요."
+      />
 
       {editing ? (
         <MissionReportForm reportDate={r.report_date} reportId={id} initialData={r} aggregated={aggregated} initialSpecialItems={specialItems} />

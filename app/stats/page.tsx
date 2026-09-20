@@ -4,6 +4,10 @@ import Image from "next/image";
 import { ArrowLeft, BarChart3, Users, ShieldCheck } from "lucide-react";
 import { FontSizeToggle } from "@/components/layout/font-size-toggle";
 import { StatisticsBody } from "@/components/admin/statistics-body";
+import { BibleCompletionList } from "@/components/reports/bible-completion-list";
+import { fetchReportedCompletions } from "@/lib/bible-completion.server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { todayKST } from "@/lib/dates";
 import { loadPublicStatistics, PERIODS, type Period } from "@/lib/stats.server";
 import { MISSION_IDS, getMissionShortName } from "@/lib/constants/sun-directory";
 
@@ -22,7 +26,8 @@ export default async function PublicStatsPage({ searchParams }: { searchParams: 
   const { period: p } = await searchParams;
   const period: Period = (["week", "month", "year"] as const).includes(p as Period) ? (p as Period) : "week";
   const meta = PERIODS.find((x) => x.key === period)!;
-  const { points, latest, missionAttend } = await loadPublicStatistics(period);
+  const { points, latest, missionAttend, since } = await loadPublicStatistics(period);
+  const bibleDone = await fetchReportedCompletions(createAdminClient(), since, todayKST());
   const mission = MISSION_IDS.map((m) => ({ name: getMissionShortName(m), attend: missionAttend.get(m) ?? 0 }));
 
   return (
@@ -55,14 +60,17 @@ export default async function PublicStatsPage({ searchParams }: { searchParams: 
             </div>
           </div>
           <p className="mt-4 rounded-2xl bg-white/15 px-4 py-3 text-base sm:text-lg" style={{ wordBreak: "keep-all" }}>
-            <b>로그인하지 않아도 누구나 볼 수 있는 화면</b>이에요. 예배 참석 인원, 성경 읽은 장수, 헌금 합계 같은 <b>전체 숫자</b>만 보여 드려요.
+            <b>로그인하지 않아도 누구나 볼 수 있는 화면</b>이에요. 예배 참석 인원, 성경 읽은 장수, 헌금 합계 같은 <b>전체 숫자</b>와,
+            성경통독·필사를 마치신 분들의 <b>이름</b>을 축하하는 마음으로 함께 올려 드려요.
           </p>
         </div>
 
         <div className="grid gap-2 sm:grid-cols-2 rise-in rise-in-2">
           <p className="flex items-start gap-2 rounded-2xl border bg-white px-4 py-3 text-base text-ink-soft shadow-soft" style={{ wordBreak: "keep-all" }}>
             <ShieldCheck className="h-6 w-6 shrink-0 text-emerald-600" />
-            <span>순원 이름·연락처·기도제목 같은 개인 정보는 들어 있지 않아요.</span>
+            <span>
+              연락처·기도제목·출석 기록 같은 <b>개인 정보는 들어 있지 않아요.</b> 이름은 성경을 다 마치신 분만 축하 명단으로 올라가요.
+            </span>
           </p>
           <p className="flex items-start gap-2 rounded-2xl border bg-white px-4 py-3 text-base text-ink-soft shadow-soft" style={{ wordBreak: "keep-all" }}>
             <Users className="h-6 w-6 shrink-0 text-brand-600" />
@@ -75,6 +83,15 @@ export default async function PublicStatsPage({ searchParams }: { searchParams: 
             </span>
           </p>
         </div>
+
+        <BibleCompletionList
+          completions={bibleDone}
+          title="성경통독 · 필사를 마치신 분들"
+          description={`${meta.desc} 동안 보고된 명단이에요. 함께 축하해 주세요! 🎉`}
+          emptyText="아직 보고된 분이 없어요."
+          showDate
+          className="rise-in rise-in-2"
+        />
 
         <StatisticsBody period={period} points={points} latest={latest} mission={mission} basePath="/stats" />
 

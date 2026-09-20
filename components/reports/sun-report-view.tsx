@@ -77,6 +77,8 @@ export function SunReportView({ report, members }: { report: SunReport; members:
                       </th>
                     ))}
                     <th className="px-2 py-3 text-center font-bold whitespace-nowrap">성경</th>
+                    <th className="px-2 py-3 text-center font-bold whitespace-nowrap">통독</th>
+                    <th className="px-2 py-3 text-center font-bold whitespace-nowrap">필사</th>
                     <th className="px-3 py-3 text-left font-bold whitespace-nowrap">메모</th>
                   </tr>
                 </thead>
@@ -90,6 +92,8 @@ export function SunReportView({ report, members }: { report: SunReport; members:
                         </td>
                       ))}
                       <td className="px-2 py-2.5 text-center font-bold tabular-nums">{m.bible_read || "-"}</td>
+                      <td className="px-2 py-2.5 text-center font-black text-violet-700">{m.bible_tongdok ? "✓" : "-"}</td>
+                      <td className="px-2 py-2.5 text-center font-black text-gold-600">{m.bible_pilsa ? "✓" : "-"}</td>
                       <td className="px-3 py-2.5 text-ink-soft max-w-[16rem]">{m.member_note ?? ""}</td>
                     </tr>
                   ))}

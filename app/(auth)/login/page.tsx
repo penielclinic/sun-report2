@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BarChart3, ChevronRight } from "lucide-react";
 import { AuthShell } from "@/components/auth/auth-shell";
+import { UpdateNotice } from "@/components/layout/update-notice";
 import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = { title: "로그인" };
@@ -10,6 +11,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { error } = await searchParams;
   return (
     <AuthShell title="로그인" subtitle="이름과 숫자 비밀번호를 입력해 주세요">
+      <UpdateNotice className="mb-5" />
+
       <LoginForm initialError={error === "rejected" ? "사용이 중지된 계정이에요. 담임목사님께 문의해 주세요" : undefined} />
 
       {/* 로그인 없이 볼 수 있는 전체 통계 */}
@@ -28,9 +31,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <ChevronRight className="h-7 w-7 shrink-0 opacity-90 transition-transform group-hover:translate-x-0.5" />
         </Link>
         <p className="mt-3 text-center text-base text-ink-soft" style={{ wordBreak: "keep-all" }}>
-          예배 참석 인원·성경 읽은 장수·헌금 합계 같은 <b>전체 숫자</b>는 누구나 볼 수 있어요.
+          예배 참석 인원·성경 읽은 장수·헌금 합계 같은 <b>전체 숫자</b>와 성경통독·필사를 마치신 분들의 이름을 누구나 볼 수 있어요.
           <br />
-          순원 이름이나 기도제목 같은 개인 정보는 들어 있지 않아요.
+          연락처·기도제목 같은 개인 정보는 들어 있지 않아요.
         </p>
       </div>
     </AuthShell>

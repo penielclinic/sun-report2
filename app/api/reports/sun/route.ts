@@ -115,6 +115,8 @@ export async function POST(request: Request) {
         bulletin_recv: m.bulletin_recv,
         bible_read: m.bible_read || 0,
         member_note: m.member_note?.trim() || null,
+        bible_tongdok: m.bible_tongdok,
+        bible_pilsa: m.bible_pilsa,
       }))
     );
     if (memErr) return jsonError("순원 저장 실패: " + memErr.message, 500);

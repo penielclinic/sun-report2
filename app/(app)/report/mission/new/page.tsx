@@ -6,6 +6,9 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/misc";
 import { MissionReportForm } from "@/components/reports/mission-report-form";
 import { MissionSummary } from "@/components/reports/mission-summary";
+import { BibleCompletionList } from "@/components/reports/bible-completion-list";
+import { fetchSunLevelCompletions } from "@/lib/bible-completion.server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { aggregateSunReports } from "@/lib/report-utils";
 import { currentReportSunday, formatKoreanDate, reportWeekEnd } from "@/lib/dates";
 import { getSunsByMission, getMissionName, BRIDGE_MISSION_ID } from "@/lib/constants/sun-directory";
@@ -33,6 +36,7 @@ export default async function NewMissionReportPage() {
     .order("sun_number");
   const reports = (sunReports ?? []) as SunReportWithMembers[];
   const aggregated = aggregateSunReports(reports);
+  const bibleDone = await fetchSunLevelCompletions(createAdminClient(), missionId, reportDate);
   const entries = getSunsByMission(missionId).map((e) => ({ sunNumber: e.sunNumber, sunLeader: e.sunLeader, missionId: e.missionId }));
 
   return (
@@ -44,6 +48,11 @@ export default async function NewMissionReportPage() {
         back={{ href: "/dashboard/mission-leader", label: "홈으로" }}
       />
       <MissionSummary sunEntries={entries} sunReports={reports} aggregated={aggregated} />
+      <BibleCompletionList
+        completions={bibleDone}
+        description="순장님들이 체크하신 내용이 저절로 모여 목사님께 함께 보고돼요."
+        emptyText="이번 주에는 통독·필사를 마치신 분이 없어요."
+      />
       <MissionReportForm reportDate={reportDate} reportId={null} initialData={null} aggregated={aggregated} initialSpecialItems={[]} />
     </div>
   );

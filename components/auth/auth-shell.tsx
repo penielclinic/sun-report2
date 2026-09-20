@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { BookOpen, ChevronRight } from "lucide-react";
 import { FontSizeToggle } from "@/components/layout/font-size-toggle";
 
 const CHURCH = process.env.NEXT_PUBLIC_CHURCH_NAME ?? "해운대순복음교회";
@@ -30,12 +31,19 @@ export function AuthShell({ children, title, subtitle }: { children: React.React
             <div className="mt-6">{children}</div>
           </div>
 
-          <p className="mt-6 text-center text-base text-ink-soft rise-in rise-in-3">
-            앱이 처음이신가요?{" "}
-            <Link href="/guide" className="font-bold text-brand-700 underline underline-offset-4">
-              사용설명서 보기
-            </Link>
-          </p>
+          <Link
+            href="/guide"
+            className="mt-6 flex items-center gap-3 rounded-2xl border-2 border-brand-200 bg-white px-4 py-3.5 shadow-soft hover:border-brand-400 hover:bg-brand-50/60 rise-in rise-in-3"
+          >
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-700">
+              <BookOpen className="h-7 w-7" strokeWidth={2.5} />
+            </span>
+            <span className="min-w-0 flex-1" style={{ wordBreak: "keep-all" }}>
+              <span className="block text-lg font-black text-ink">앱이 처음이신가요?</span>
+              <span className="block text-base text-ink-soft">사용설명서를 먼저 읽어 보세요</span>
+            </span>
+            <ChevronRight className="h-6 w-6 shrink-0 text-brand-400" />
+          </Link>
         </div>
       </main>
     </div>
